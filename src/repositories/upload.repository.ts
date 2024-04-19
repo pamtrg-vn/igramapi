@@ -129,7 +129,7 @@ export class UploadRepository extends Repository {
           'Stream-Id': options.streamId,
           'Segment-Start-Offset': options.startOffset,
           X_FB_VIDEO_WATERFALL_ID: options.waterfallId,
-          'Segment-Type': '2',
+          'Segment-Type': '3',
           'Accept-Encoding': 'gzip',
         },
       },
@@ -156,7 +156,7 @@ export class UploadRepository extends Repository {
         'Stream-Id': options.streamId,
         'X-Entity-Type': 'video/mp4',
         'Segment-Start-Offset': options.startOffset,
-        'Segment-Type': '2',
+        'Segment-Type': '3',
         X_FB_VIDEO_WATERFALL_ID: options.waterfallId,
         // TODO: inspect offset
         Offset: 0,
@@ -227,6 +227,7 @@ export class UploadRepository extends Repository {
       upload_media_height: height?.toString(),
       upload_media_width: width?.toString(),
       upload_media_duration_ms: duration.toString(),
+      upload_engine_config_enum: '0',
     };
     if (options.isSidecar) {
       ruploadParams.is_sidecar = '1';
@@ -243,6 +244,9 @@ export class UploadRepository extends Repository {
     }
     if (options.isIgtvVideo) {
       ruploadParams.is_igtv_video = '1';
+    }
+    if (options.isReelVideo) {
+      ruploadParams.is_clips_video = '1';
     }
     if (options.isDirectVoice) {
       ruploadParams.is_direct_voice = '1';

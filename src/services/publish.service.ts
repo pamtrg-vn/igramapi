@@ -29,6 +29,8 @@ import { random, defaults } from 'lodash';
 import { UploadRepository } from '../repositories/upload.repository';
 import debug from 'debug';
 import { StickerBuilder } from '../sticker-builder';
+import { PostingReelOptions } from '../types/posting.reel.options';
+import { MediaConfigureToReelOptions } from '../types/media.configure-to-reel.options';
 
 export class PublishService extends Repository {
   private static publishDebug = debug('ig:publish');
@@ -453,6 +455,110 @@ export class PublishService extends Repository {
     }
   }
 
+  public async reel(options: PostingReelOptions) {
+    const videoInfo = PublishService.getVideoInfo(options.video);
+    PublishService.publishDebug(`Publishing video to igtv: ${JSON.stringify(videoInfo)}`);
+    const uploadId = Date.now().toString();
+    let retryContext = { num_step_auto_retry: 0, num_reupload: 0, num_step_manual_retry: 0 };
+
+    if (videoInfo.duration > 90000) {
+      const uploadResult = await this.segmentedVideo({
+        video: options.video,
+        isReelVideo: true,
+        ...videoInfo,
+        uploadId,
+        ...options.uploadOptions,
+      });
+      retryContext = uploadResult.retryContext;
+    } else {
+      await Bluebird.try(() =>
+        this.regularVideo({
+          video: options.video,
+          isReelVideo: true,
+          uploadId,
+          ...videoInfo,
+        }),
+      ).catch(IgResponseError, error => {
+        throw new IgUploadVideoError(error.response as IgResponse<UploadRepositoryVideoResponseRootObject>, videoInfo);
+      });
+    }
+    await this.client.upload.photo({ uploadId, file: options.coverImage });
+    // await this.resolveTranscode(videoInfo, uploadId, options.transcodeDelay, options.maxTranscodeTries);
+    const form: MediaConfigureToReelOptions = {
+      upload_id: uploadId,
+      caption: options.caption,
+      audio_muted: options.audioMuted ?? false,
+      length: videoInfo.duration / 1000.0,
+      extra: {
+        source_width: videoInfo.width,
+        source_height: videoInfo.height,
+      },
+      retryContext,
+      clips_creation_entry_point: 'clips',
+      capture_type: 'clips_v2',
+      audience: 'default',
+      is_clips_edited: '0',
+      clips_share_preview_to_feed: typeof options.shareToFeed == 'boolean' ? (options.shareToFeed ? '1' : '0') : '1',
+      is_shared_to_fb: typeof options.shareToFB == 'boolean' ? (options.shareToFB ? '1' : '0') : '0',
+      like_and_view_counts_disabled:
+        typeof options.likeAndViewCountDisable == 'boolean' ? (options.likeAndViewCountDisable ? '1' : '0') : '0',
+      is_gifting_enabled: typeof options.enableGift == 'boolean' ? (options.enableGift ? '1' : '0') : '1',
+      disable_comments: typeof options.disableComments == 'boolean' ? (options.disableComments ? '1' : '0') : '0',
+      video_subtitles_enabled:
+        typeof options.subtitlesTranslation == 'boolean' ? (options.subtitlesTranslation ? '1' : '0') : '0',
+      include_e2ee_mentioned_user_list: '1',
+      third_party_downloads_enabled:
+        typeof options.allowDownload == 'boolean' ? (options.allowDownload ? '1' : '0') : '1',
+    };
+
+    if (options.music) {
+      form.audio_muted = false;
+      if (options.music?.additionalInfo)
+        form.additional_audio_info = {
+          has_voiceover_attribution: options.music?.additionalInfo?.hasVoiceoverAttribution ? '1' : '0',
+        };
+      if (options.music.params)
+        form.music_params = {
+          audio_asset_id: options.music.params.audioAssetId,
+          audio_cluster_id: options.music.params.audioClusterId,
+          audio_asset_start_time_in_ms: options.music.params.audioAssetStartTimeInMs,
+          derived_content_start_time_in_ms: options.music.params.derivedContentStartTimeInMs,
+          overlap_duration_in_ms: options.music.params.overlapDurationInMs,
+          song_name: options.music.params.songName,
+          artist_name: options.music.params.artistName,
+          product: options.music.params.product ?? 'story_camera_clips_v2',
+          ...(options.music.params.browseSessionId && { browse_session_id: options.music.params.browseSessionId }),
+          ...(options.music.params.alacornSessionId && { alacorn_session_id: options.music.params.alacornSessionId }),
+        };
+      if (options.music.metadata)
+        form.clips_audio_metadata = {
+          original: { volume_level: options.music.metadata.original.volumeLevel },
+          song: {
+            volume_level: options.music.metadata.song.volumeLevel,
+            is_saved: options.music.metadata.song.isSaved ? '1' : '0',
+            audio_asset_id: options.music.metadata.song.audioAssetId ?? options.music.params.audioAssetId,
+            audio_cluster_id: options.music.metadata.song.audioClusterId ?? options.music.params.audioClusterId,
+            track_name: options.music.metadata.song.trackName ?? options.music.params.songName,
+            artist_name: options.music.metadata.song.artistName ?? options.music.params.artistName,
+            is_picked_precapture: options.music.metadata.song.isPickedPrecapture ? '1' : '0',
+          },
+        };
+    }
+
+    const finalInput = { ...form, ...options.configureOptions };
+
+    for (let i = 0; i < 6; i++) {
+      try {
+        return await this.client.media.configureToReel(finalInput);
+      } catch (e) {
+        if (i >= 6) {
+          throw new IgConfigureVideoError(e.response, finalInput);
+        }
+        await Bluebird.delay((i + 1) * 2 * 1000);
+      }
+    }
+  }
+
   private async regularVideo(options: UploadVideoOptions) {
     options = defaults(options, {
       uploadId: Date.now(),
@@ -470,12 +576,14 @@ export class PublishService extends Repository {
 
   private async segmentedVideo(
     options: UploadSegmentedVideoOptions,
-  ): Promise<StatusResponse & { retryContext: UploadRetryContext; uploadId: string; waterfallId: string }> {
+  ): Promise<
+    StatusResponse & { retryContext: UploadRetryContext; uploadId: string; mediaId: string; waterfallId: string }
+  > {
+    let mediaId = (options as any)?.mediaId || Date.now().toString();
     const uploadId = options.uploadId || Date.now().toString();
     const retryContext = options.retryContext || { num_step_auto_retry: 0, num_reupload: 0, num_step_manual_retry: 0 };
     const ruploadParams = UploadRepository.createVideoRuploadParams(options, uploadId, retryContext);
     const waterfallId = options.waterfallId || random(1000000000, 9999999999).toString();
-
     const { stream_id: streamId } = await this.client.upload.startSegmentedVideo(ruploadParams);
 
     const segments =
@@ -502,7 +610,7 @@ export class PublishService extends Repository {
           `Offset != 0 isn't implemented. Open an issue including your network config and other setup information to reproduce.`,
         );
       }
-      await this.client.upload.videoSegmentTransfer({
+      const transferred = await this.client.upload.videoSegmentTransfer({
         waterfallId,
         streamId,
         startOffset,
@@ -510,10 +618,12 @@ export class PublishService extends Repository {
         transferId,
         segment,
       });
+      if (transferred?.media_id) mediaId = transferred.media_id;
       startOffset += segment.byteLength;
     }
     const end = await this.client.upload.endSegmentedVideo({ ruploadParams, streamId });
-    return { ...end, retryContext, uploadId, waterfallId };
+
+    return { ...end, retryContext, uploadId, waterfallId, mediaId };
   }
 
   private async uploadAndConfigureStoryPhoto(

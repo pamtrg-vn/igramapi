@@ -30,6 +30,7 @@ import { MediaRepositoryConfigureResponseRootObject } from '../responses';
 import Chance = require('chance');
 import { MediaRepositoryCheckOffensiveCommentResponseRootObject } from '../responses';
 import { StoryMusicQuestionResponse, StoryTextQuestionResponse } from '../types/story-response.options';
+import { MediaConfigureToReelOptions } from '../types/media.configure-to-reel.options';
 
 export class MediaRepository extends Repository {
   public async info(mediaId: string): Promise<MediaInfoResponseRootObject> {
@@ -618,6 +619,55 @@ export class MediaRepository extends Repository {
     return body;
   }
 
+  public async configureToReel(options: MediaConfigureToReelOptions) {
+    const form: MediaConfigureToReelOptions = defaultsDeep(options, {
+      caption: '',
+      date_time_original: new Date().toISOString().replace(/[-:]/g, ''),
+      clips_share_preview_to_feed: options.clips_share_preview_to_feed ?? '1',
+      clips: [
+        {
+          length: options.length,
+          source_type: options.source_type || '4',
+        },
+      ],
+      audio_muted: false,
+      poster_frame_index: 0,
+      filter_type: '0',
+      timezone_offset: this.client.state.timezoneOffset,
+      media_folder: options.source_type !== '4' ? 'Camera' : undefined,
+      source_type: '4',
+      device: this.client.state.devicePayload,
+      retryContext: {
+        num_step_auto_retry: 0,
+        num_reupload: 0,
+        num_step_manual_retry: 0,
+      },
+    });
+    const retryContext = options.retryContext;
+    delete form.retryContext;
+    const { body } = await this.client.request.send({
+      url: '/api/v1/media/configure_to_clips/',
+      method: 'POST',
+      qs: {
+        video: '1',
+      },
+      headers: {
+        is_clips_video: '1',
+        retry_context: JSON.stringify(retryContext),
+      },
+      form: this.client.request.sign({
+        ...form,
+        ...(this.client.state.cookieCsrfToken !== 'missing' && {
+          _csrftoken: this.client.state.cookieCsrfToken,
+        }),
+        _uid: this.client.state.cookieUserId,
+        _uuid: this.client.state.uuid,
+        device: this.client.state.devicePayload,
+      }),
+    });
+    return body;
+  }
+
   public async onlyMe(mediaId: string): Promise<StatusResponse> {
     const { body } = await this.client.request.send({
       url: `/api/v1/media/${mediaId}/only_me/`,
@@ -682,10 +732,10 @@ export class MediaRepository extends Repository {
    * save a media, or save it to collection if you pass the collection ids in array
    * @param {string} mediaId - The mediaId of the post
    * @param {string[]} [collection_ids] - Optional, The array of collection ids if you want to save the media to a specific collection
-   * Example: 
+   * Example:
    * save("2524149952724070925_1829855275") save media
    * save("2524149952724070925_1829855275", ["17865977635619975"]) save media to 1 collection
-   * save("2524149952724070925_1829855275", ["17865977635619975", "17845997638619928"]) save media to 2 collection 
+   * save("2524149952724070925_1829855275", ["17865977635619975", "17845997638619928"]) save media to 2 collection
    */
   public async save(mediaId: string, collection_ids?: string[]) {
     const { body } = await this.client.request.send({
@@ -795,27 +845,24 @@ export class MediaRepository extends Repository {
     });
     return body;
   }
-  
-  private async storyCountdownAction(
-    countdownId: string | number,
-    action: string,
-  ): Promise<StatusResponse> {
+
+  private async storyCountdownAction(countdownId: string | number, action: string): Promise<StatusResponse> {
     const { body } = await this.client.request.send({
       url: `/api/v1/media/${countdownId}/${action}/`,
       method: 'POST',
       form: this.client.request.sign({
         _csrftoken: this.client.state.cookieCsrfToken,
         _uid: this.client.state.cookieUserId,
-        _uuid: this.client.state.uuid
+        _uuid: this.client.state.uuid,
       }),
     });
     return body;
   }
-  
+
   public async storyCountdownFollow(countdownId: string | number) {
     return this.storyCountdownAction(countdownId, 'follow_story_countdown');
   }
-  
+
   public async storyCountdownUnfollow(countdownId: string | number) {
     return this.storyCountdownAction(countdownId, 'unfollow_story_countdown');
   }

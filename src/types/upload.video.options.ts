@@ -13,6 +13,7 @@ export interface UploadVideoOptions {
   mediaType?: string;
   forDirectStory?: boolean;
   isIgtvVideo?: boolean;
+  isReelVideo?: boolean;
   waterfallId?: string;
   uploadName?: string;
   offset?: number;
