@@ -83,6 +83,7 @@ export class State {
   authorization?: string;
   passwordEncryptionPubKey?: string;
   passwordEncryptionKeyId?: string | number;
+  machineId?: string;
   deviceString: string;
   build: string;
   uuid: string;
@@ -112,6 +113,10 @@ export class State {
 
   @Enumerable(false)
   parsedAuthorization?: ParsedAuthorization;
+
+  public setLanguage(language: string): void {
+    this.language = language;
+  }
 
   /**
    * The current application session ID.

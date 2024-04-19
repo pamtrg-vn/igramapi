@@ -29,7 +29,7 @@ type Payload = { [key: string]: any } | string;
 
 interface SignedPost {
   signed_body: string;
-  ig_sig_key_version: string;
+  ig_sig_key_version?: string;
 }
 
 export class Request {
@@ -73,8 +73,10 @@ export class Request {
       },
       this.defaults,
     );
+
     Request.requestDebug(`Requesting ${options.method} ${options.url || options.uri || '[could not find url]'}`);
     const response = await this.faultTolerantRequest(options);
+
     this.updateState(response);
     process.nextTick(() => this.end$.next());
     if (response.body.status === 'ok' || (onlyCheckHttpStatus && response.statusCode === 200)) {
@@ -91,6 +93,7 @@ export class Request {
       'ig-set-authorization': auth,
       'ig-set-password-encryption-key-id': pwKeyId,
       'ig-set-password-encryption-pub-key': pwPubKey,
+      'ig-set-x-mid': machineId,
     } = response.headers;
     if (typeof wwwClaim === 'string') {
       this.client.state.igWWWClaim = wwwClaim;
@@ -104,9 +107,13 @@ export class Request {
     if (typeof pwPubKey === 'string') {
       this.client.state.passwordEncryptionPubKey = pwPubKey;
     }
+    if (typeof machineId === 'string') {
+      this.client.state.machineId = machineId;
+    }
   }
 
   public signature(data: string) {
+    if (this.client.state.signatureKey == 'SIGNATURE') return this.client.state.signatureKey;
     return createHmac('sha256', this.client.state.signatureKey)
       .update(data)
       .digest('hex');
@@ -115,6 +122,8 @@ export class Request {
   public sign(payload: Payload): SignedPost {
     const json = typeof payload === 'object' ? JSON.stringify(payload) : payload;
     const signature = this.signature(json);
+
+    if (signature == 'SIGNATURE') return { signed_body: `${signature}.${json}` };
     return {
       ig_sig_key_version: this.client.state.signatureVersion,
       signed_body: `${signature}.${json}`,
@@ -199,7 +208,7 @@ export class Request {
         typeof this.client.state.euDCEnabled === 'undefined' ? void 0 : this.client.state.euDCEnabled.toString(),
       'X-IG-Extended-CDN-Thumbnail-Cache-Busting-Value': this.client.state.thumbnailCacheBustingValue.toString(),
       'X-Bloks-Version-Id': this.client.state.bloksVersionId,
-      'X-MID': this.client.state.extractCookie('mid')?.value,
+      'X-MID': this.client.state.extractCookie('mid')?.value ?? this.client.state.machineId,
       'X-IG-WWW-Claim': this.client.state.igWWWClaim || '0',
       'X-Bloks-Is-Layout-RTL': this.client.state.isLayoutRTL.toString(),
       'X-IG-Connection-Type': this.client.state.connectionTypeHeader,
