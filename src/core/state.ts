@@ -8,7 +8,7 @@ import * as builds from '../samples/builds.json';
 import * as supportedCapabilities from '../samples/supported-capabilities.json';
 import * as Constants from './constants';
 import { ChallengeStateResponse, CheckpointResponse } from '../responses';
-import { IgCookieNotFoundError, IgNoCheckpointError, IgUserIdNotFoundError } from '../errors';
+import { IgClientError, IgCookieNotFoundError, IgNoCheckpointError, IgUserIdNotFoundError } from '../errors';
 import { Enumerable } from '../decorators';
 import debug from 'debug';
 
@@ -268,9 +268,9 @@ export class State {
     }
   }
 
-  public generateDevice(seed: string): void {
+  public generateDevice(seed: string, customDevices?: string[], customBuilds?: string[]): void {
     const chance = new Chance(seed);
-    this.deviceString = chance.pickone(devices);
+    this.deviceString = chance.pickone(this.validateDevices(customDevices ?? devices));
     const id = chance.string({
       pool: 'abcdef0123456789',
       length: 16,
@@ -279,7 +279,33 @@ export class State {
     this.uuid = chance.guid();
     this.phoneId = chance.guid();
     this.adid = chance.guid();
-    this.build = chance.pickone(builds);
+    this.build = chance.pickone(customBuilds ?? builds);
+  }
+
+  public validateDevices(devices: string[]): string[] {
+    return devices.map(deviceString => this.validateDevice(deviceString));
+  }
+
+  public validateDevice(deviceString: string): string {
+    const parts = deviceString.split(';').map(part => part.trim());
+    const deviceInfo = {
+      androidVersion: parts[0].split('/')[0],
+      apiLevel: parts[0].split('/')[1],
+      dpi: parts[1].replace('dpi', ''),
+      resolution: parts[2],
+      brand: parts[3],
+      model: parts[4],
+      codename: parts[5],
+      chipset: parts[6],
+    };
+
+    for (const valueInfo of Object.values(deviceInfo)) {
+      if (typeof valueInfo !== 'string' || valueInfo == '') {
+        throw new IgClientError(`Device invalid: "${deviceString}"`);
+      }
+    }
+
+    return deviceString;
   }
 
   private generateTemporaryGuid(seed: string, lifetime: number) {
