@@ -1,6 +1,7 @@
 import { Expose, plainToClassFromExist } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { AccountFollowingFeedResponse, AccountFollowingFeedResponseUsersItem } from '../responses';
+import { AccountFollowingFeedOptions } from '../types/feed.options';
 
 export class AccountFollowingFeed extends Feed<AccountFollowingFeedResponse, AccountFollowingFeedResponseUsersItem> {
   searchSurface?: string;
@@ -11,11 +12,37 @@ export class AccountFollowingFeed extends Feed<AccountFollowingFeedResponse, Acc
 
   id: number | string;
   @Expose()
-  public nextMaxId: string;
+  private nextMaxId: string;
 
-  set state(body: AccountFollowingFeedResponse) {
+  protected set state(body: AccountFollowingFeedResponse) {
     this.moreAvailable = !!body.next_max_id;
     this.nextMaxId = body.next_max_id;
+  }
+
+  public setOptions(options: Partial<AccountFollowingFeedOptions>) {
+    this.id = options?.id || this.id;
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    this.searchSurface = options?.searchSurface || this.searchSurface;
+    this.order = options?.order || this.order;
+    this.query = options?.query || this.query;
+    this.enableGroups = options?.enableGroups || this.enableGroups;
+    this.includesHashtags = options?.includesHashtags || this.enableGroups;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
+  }
+
+  public setQuery(query: string) {
+    this.query = query;
+    return this;
+  }
+
+  public setSearchSurface(searchSurface: string) {
+    this.searchSurface = searchSurface;
+    return this;
   }
 
   async request() {

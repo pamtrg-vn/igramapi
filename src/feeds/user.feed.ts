@@ -1,11 +1,28 @@
 import { Expose } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { UserFeedResponse, UserFeedResponseItemsItem } from '../responses';
+import { UserFeedOptions } from '../types';
 
 export class UserFeed extends Feed<UserFeedResponse, UserFeedResponseItemsItem> {
   id: number | string;
   @Expose()
   private nextMaxId: string;
+
+  public setOptions(options: Partial<UserFeedOptions>) {
+    this.id = options.id || this.id;
+    this.nextMaxId = options.nextMaxId || this.nextMaxId;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
+  }
+
+  public setId(id: string | number) {
+    this.id = id;
+    return this;
+  }
 
   protected set state(body: UserFeedResponse) {
     this.moreAvailable = body.more_available;

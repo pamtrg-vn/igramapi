@@ -1,14 +1,25 @@
 import { Expose, plainToClassFromExist } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { NewsFeedResponseRootObject, NewsFeedResponseStoriesItem } from '../responses';
+import { NewsFeedOptions } from '../types/feed.options';
 
 export class NewsFeed extends Feed<NewsFeedResponseRootObject, NewsFeedResponseStoriesItem> {
   @Expose()
   private nextMaxId: string | number;
 
-  set state(body: NewsFeedResponseRootObject) {
+  protected set state(body: NewsFeedResponseRootObject) {
     this.moreAvailable = !!body.next_max_id;
     this.nextMaxId = body.next_max_id;
+  }
+
+  public setOptions(options: Partial<NewsFeedOptions>) {
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
   }
 
   async request() {

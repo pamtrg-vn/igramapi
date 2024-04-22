@@ -1,12 +1,24 @@
 import { Feed } from '../core/feed';
 import { Expose } from 'class-transformer';
 import { IgtvBrowseFeedResponseBrowseItemsItem, IgtvBrowseFeedResponseRootObject } from '../responses';
+import { IgtvBrowseFeedOptions } from '../types/feed.options';
 
 export class IgtvBrowseFeed extends Feed<IgtvBrowseFeedResponseRootObject, IgtvBrowseFeedResponseBrowseItemsItem> {
   isPrefetch: boolean = false;
 
   @Expose()
   private maxId: string;
+
+  public setOptions(options: Partial<IgtvBrowseFeedOptions>) {
+    this.maxId = options?.maxId || this.maxId;
+    this.isPrefetch = options?.isPrefetch || this.isPrefetch;
+    return this;
+  }
+
+  public setMaxId(maxId: string) {
+    this.maxId = maxId;
+    return this;
+  }
 
   async items(): Promise<IgtvBrowseFeedResponseBrowseItemsItem[]> {
     const req = await this.request();

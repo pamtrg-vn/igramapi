@@ -2,6 +2,7 @@ import { flatten } from 'lodash';
 import { Expose } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { LocationFeedResponse, LocationFeedResponseMedia } from '../responses';
+import { LocationFeedOptions } from '../types/feed.options';
 
 export class LocationFeed extends Feed<LocationFeedResponse, LocationFeedResponseMedia> {
   id: string | number;
@@ -11,13 +12,30 @@ export class LocationFeed extends Feed<LocationFeedResponse, LocationFeedRespons
   @Expose()
   private nextPage: number;
   @Expose()
-  private nextMediaIds: Array<string> = [];
+  private nextMediaIds: string[] = [];
 
   protected set state(body: LocationFeedResponse) {
     this.moreAvailable = body.more_available;
     this.nextMaxId = body.next_max_id;
     this.nextPage = body.next_page;
     this.nextMediaIds = body.next_media_ids;
+  }
+
+  public setOptions(options: Partial<LocationFeedOptions>) {
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    this.nextMediaIds = options?.nextMediaIds || this.nextMediaIds;
+    this.nextPage = options?.nextPage || this.nextPage;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
+  }
+
+  public setNextMediaIds(nextMediaIds: string[]) {
+    this.nextMediaIds = nextMediaIds;
+    return this;
   }
 
   public async request() {

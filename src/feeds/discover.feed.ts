@@ -1,14 +1,25 @@
 import { Expose, plainToClassFromExist } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { DiscoverFeedResponseRootObject, DiscoverFeedResponseUser } from '../responses';
+import { DiscoverFeedOptions } from '../types/feed.options';
 
 export class DiscoverFeed extends Feed<DiscoverFeedResponseRootObject, DiscoverFeedResponseUser> {
   @Expose()
   private nextMaxId: string;
 
-  set state(body: DiscoverFeedResponseRootObject) {
+  protected set state(body: DiscoverFeedResponseRootObject) {
     this.moreAvailable = body.more_available;
     this.nextMaxId = body.max_id;
+  }
+
+  public setOptions(options: Partial<DiscoverFeedOptions>) {
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    return this;
+  }
+
+  public setNexMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
   }
 
   async request() {

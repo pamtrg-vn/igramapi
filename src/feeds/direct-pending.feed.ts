@@ -2,6 +2,7 @@ import { Expose } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { DirectInboxFeedResponse, DirectInboxFeedResponseThreadsItem } from '../responses';
 import { DirectThreadEntity } from '../entities';
+import { DirectPendingInboxFeedOptions } from '../types/feed.options';
 
 export class DirectPendingInboxFeed extends Feed<DirectInboxFeedResponse, DirectInboxFeedResponseThreadsItem> {
   @Expose()
@@ -9,10 +10,26 @@ export class DirectPendingInboxFeed extends Feed<DirectInboxFeedResponse, Direct
   @Expose()
   private seqId: number;
 
-  set state(body: DirectInboxFeedResponse) {
+  protected set state(body: DirectInboxFeedResponse) {
     this.moreAvailable = body.inbox.has_older;
     this.seqId = body.seq_id;
     this.cursor = body.inbox.oldest_cursor;
+  }
+
+  public setOptions(options: Partial<DirectPendingInboxFeedOptions>) {
+    this.cursor = options?.cursor || this.cursor;
+    this.seqId = options?.seqId;
+    return this;
+  }
+
+  public setCursor(cursor: string) {
+    this.cursor = cursor;
+    return this;
+  }
+
+  public setSeqId(seqId: number) {
+    this.seqId = seqId;
+    return this;
   }
 
   async request() {

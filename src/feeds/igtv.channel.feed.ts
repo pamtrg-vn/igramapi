@@ -4,6 +4,7 @@ import {
   IgtvChannelFeedResponseItemsItem,
   IgtvChannelFeedResponseRootObject,
 } from '../responses/igtv.channel.feed.response';
+import { IgtvChannelFeedOptions } from '../types/feed.options';
 
 export class IgtvChannelFeed extends Feed<IgtvChannelFeedResponseRootObject, IgtvChannelFeedResponseItemsItem> {
   channelId: string;
@@ -14,6 +15,22 @@ export class IgtvChannelFeed extends Feed<IgtvChannelFeedResponseRootObject, Igt
   protected set state(response: IgtvChannelFeedResponseRootObject) {
     this.moreAvailable = response.more_available;
     this.maxId = response.max_id;
+  }
+
+  public setOptions(options: Partial<IgtvChannelFeedOptions>) {
+    this.maxId = options?.maxId || this.maxId;
+    this.channelId = options?.channelId || this.channelId;
+    return this;
+  }
+
+  public setMaxId(maxId: string) {
+    this.maxId = maxId;
+    return this;
+  }
+
+  public setChannelId(channelId: string) {
+    this.channelId = channelId;
+    return this;
   }
 
   async request(): Promise<IgtvChannelFeedResponseRootObject> {

@@ -26,3 +26,4 @@ export * from './media.configure-to-igtv.options';
 export * from './upload.video.options';
 export * from './user.lookup.options';
 export * from './igtv.write-seen-state.options';
+export * from './feed.options';

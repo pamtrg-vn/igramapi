@@ -1,10 +1,21 @@
 import { Feed } from '../core/feed';
 import { Expose } from 'class-transformer';
 import { LikedFeedResponseItemsItem, LikedFeedResponseRootObject } from '../responses';
+import { LikedFeedOptions } from '../types/feed.options';
 
 export class LikedFeed extends Feed<LikedFeedResponseRootObject, LikedFeedResponseItemsItem> {
   @Expose()
   private maxId: string;
+
+  public setOptions(options: Partial<LikedFeedOptions>) {
+    this.maxId = options?.maxId || this.maxId;
+    return this;
+  }
+
+  public setMaxId(maxId: string) {
+    this.maxId = maxId;
+    return this;
+  }
 
   async items(): Promise<LikedFeedResponseItemsItem[]> {
     const res = await this.request();

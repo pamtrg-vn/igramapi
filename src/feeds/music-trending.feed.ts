@@ -1,3 +1,4 @@
+import { MusicTrendingFeedOptions } from '../types/feed.options';
 import { Feed } from '../core/feed';
 import { MusicTrendingFeedResponseItemsItem, MusicTrendingFeedResponseRootObject } from '../responses';
 import { IgAppModule } from '../types/common.types';
@@ -9,6 +10,17 @@ export class MusicTrendingFeed extends Feed<MusicTrendingFeedResponseRootObject,
 
   @Expose()
   public product: IgAppModule;
+
+  public setOptions(options: Partial<MusicTrendingFeedOptions>) {
+    this.product = options?.product || this.product;
+    this.nextCursor = options?.nextCursor || this.nextCursor;
+    return this;
+  }
+
+  public setNextCursor(nextCursor: string) {
+    this.nextCursor = nextCursor;
+    return this;
+  }
 
   async items(): Promise<MusicTrendingFeedResponseItemsItem[]> {
     const response = await this.request();

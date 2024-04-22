@@ -1,3 +1,4 @@
+import { ListReelMediaViewerFeedOptions } from '../types/feed.options';
 import { Feed } from '../core/feed';
 import { ListReelMediaViewerFeedResponseRootObject, ListReelMediaViewerFeedResponseUsersItem } from '../responses';
 import { Expose } from 'class-transformer';
@@ -10,6 +11,17 @@ export class ListReelMediaViewerFeed extends Feed<
   private mediaId: string;
   @Expose()
   private nextMaxId?: string = undefined;
+
+  public setOptions(options: Partial<ListReelMediaViewerFeedOptions>) {
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    this.mediaId = options?.mediaId || this.mediaId;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
+  }
 
   async items(): Promise<ListReelMediaViewerFeedResponseUsersItem[]> {
     const res = await this.request();

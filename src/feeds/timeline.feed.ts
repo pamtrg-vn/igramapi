@@ -3,15 +3,41 @@ import { sample } from 'lodash';
 import { Feed } from '../core/feed';
 import { TimelineFeedReason, TimelineFeedsOptions } from '../types/timeline-feed.types';
 import { TimelineFeedResponse, TimelineFeedResponseMedia_or_ad } from '../responses';
+import { TimelineFeedOptions } from '../types';
 
 export class TimelineFeed extends Feed<TimelineFeedResponse, TimelineFeedResponseMedia_or_ad> {
   tag: string;
+
   @Expose()
   private nextMaxId: string;
+
   public reason: TimelineFeedReason = sample(['pull_to_refresh', 'warm_start_fetch', 'cold_start_fetch']);
+
   set state(body) {
     this.moreAvailable = body.more_available;
     this.nextMaxId = body.next_max_id;
+  }
+
+  public setOptions(options: Partial<TimelineFeedOptions>) {
+    this.tag = options.tag || this.tag;
+    this.nextMaxId = options.nextMaxId || this.nextMaxId;
+    this.reason = options.reason || this.reason;
+    return this;
+  }
+
+  public setTag(tag: string) {
+    this.tag = tag;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
+  }
+
+  public setReason(reason: TimelineFeedOptions['reason']) {
+    this.reason = reason;
+    return this;
   }
 
   async request(options: TimelineFeedsOptions = {}) {

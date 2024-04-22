@@ -1,6 +1,7 @@
 import { Expose, plainToClassFromExist } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { PendingFriendshipsFeedResponse, PendingFriendshipsFeedResponseUsersItem } from '../responses';
+import { PendingFriendshipsFeedOptions } from '../types/feed.options';
 
 export class PendingFriendshipsFeed extends Feed<
   PendingFriendshipsFeedResponse,
@@ -9,9 +10,19 @@ export class PendingFriendshipsFeed extends Feed<
   @Expose()
   private nextMaxId: string;
 
-  set state(body: PendingFriendshipsFeedResponse) {
+  protected set state(body: PendingFriendshipsFeedResponse) {
     this.moreAvailable = !!body.next_max_id;
     this.nextMaxId = body.next_max_id;
+  }
+
+  public setOptions(options: Partial<PendingFriendshipsFeedOptions>) {
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
   }
 
   async request() {

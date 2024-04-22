@@ -4,22 +4,51 @@ import {
   MediaInlineChildCommentsFeedResponseChildCommentsItem,
   MediaInlineChildCommentsFeedResponseRootObject,
 } from '../responses/media.inline-child-comments.feed.response';
+import { MediaInlineChildCommentsFeedOptions } from '../types/feed.options';
 
 export class MediaInlineChildCommentsFeed extends Feed<
   MediaInlineChildCommentsFeedResponseRootObject,
   MediaInlineChildCommentsFeedResponseChildCommentsItem
 > {
-  mediaId: string;
-  commentId: string;
+  private mediaId: string;
+  private commentId: string;
   @Expose()
-  private nextMaxId: string;
+  protected nextMaxId: string;
   @Expose()
-  private nextMinId?: string;
+  protected nextMinId?: string;
 
-  set state(state: MediaInlineChildCommentsFeedResponseRootObject) {
+  protected set state(state: MediaInlineChildCommentsFeedResponseRootObject) {
     this.moreAvailable = !!state.next_max_child_cursor;
     this.nextMaxId = state.next_max_child_cursor;
     this.nextMinId = undefined;
+  }
+
+  public setOptions(options: Partial<MediaInlineChildCommentsFeedOptions>) {
+    this.mediaId = options?.mediaId || this.mediaId;
+    this.commentId = options?.commentId || this.commentId;
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    this.nextMinId = options?.nextMinId || this.nextMinId;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
+  }
+
+  public setNextMinId(nextMinId: string) {
+    this.nextMinId = nextMinId;
+    return this;
+  }
+
+  public setMediaId(mediaId: string) {
+    this.mediaId = mediaId;
+    return this;
+  }
+
+  public setCommentId(commentId: string) {
+    this.commentId = commentId;
+    return this;
   }
 
   public async request(): Promise<MediaInlineChildCommentsFeedResponseRootObject> {

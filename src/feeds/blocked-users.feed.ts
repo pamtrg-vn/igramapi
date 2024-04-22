@@ -1,6 +1,7 @@
 import { Expose, plainToClassFromExist } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { BlockedUsersFeedResponseRootObject, BlockedUsersFeedResponseBlockedListItem } from '../responses';
+import { BlockedUsersFeedOptions } from '../types/feed.options';
 
 export class BlockedUsersFeed extends Feed<
   BlockedUsersFeedResponseRootObject,
@@ -9,9 +10,19 @@ export class BlockedUsersFeed extends Feed<
   @Expose()
   private nextMaxId: string;
 
-  set state(body: BlockedUsersFeedResponseRootObject) {
+  protected set state(body: BlockedUsersFeedResponseRootObject) {
     this.moreAvailable = !!body.next_max_id;
     this.nextMaxId = body.next_max_id;
+  }
+
+  public setOptions(options: Partial<BlockedUsersFeedOptions>) {
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
   }
 
   async request() {

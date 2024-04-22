@@ -2,6 +2,7 @@ import { Feed } from '../core/feed';
 import { IgAppModule } from '../types/common.types';
 import { MusicSearchFeedResponseItemsItem, MusicSearchFeedResponseRootObject } from '../responses';
 import { Expose } from 'class-transformer';
+import { MusicSearchFeedOptions } from '../types/feed.options';
 
 export class MusicSearchFeed extends Feed<MusicSearchFeedResponseRootObject, MusicSearchFeedResponseItemsItem> {
   @Expose()
@@ -13,6 +14,19 @@ export class MusicSearchFeed extends Feed<MusicSearchFeedResponseRootObject, Mus
   public query: string;
   @Expose()
   public searchSessionId: string;
+
+  public setOptions(options: Partial<MusicSearchFeedOptions>) {
+    this.query = options?.query || this.query;
+    this.product = options?.product || this.product;
+    this.nextCursor = options?.nextCursor || this.nextCursor;
+    this.searchSessionId = options?.searchSessionId || this.query;
+    return this;
+  }
+
+  public setNextCursor(nextCursor: string) {
+    this.nextCursor = nextCursor;
+    return this;
+  }
 
   async items(): Promise<MusicSearchFeedResponseItemsItem[]> {
     const response = await this.request();

@@ -2,6 +2,7 @@ import { Feed } from '../core/feed';
 import { IgAppModule } from '../types/common.types';
 import { MusicMoodFeedResponseItemsItem, MusicMoodFeedResponseRootObject } from '../responses';
 import { Expose } from 'class-transformer';
+import { MusicMoodFeedOptions } from '../types/feed.options';
 
 export class MusicMoodFeed extends Feed<MusicMoodFeedResponseRootObject, MusicMoodFeedResponseItemsItem> {
   @Expose()
@@ -15,6 +16,18 @@ export class MusicMoodFeed extends Feed<MusicMoodFeedResponseRootObject, MusicMo
   async items(): Promise<MusicMoodFeedResponseItemsItem[]> {
     const response = await this.request();
     return response.items;
+  }
+
+  public setOptions(options: Partial<MusicMoodFeedOptions>) {
+    this.id = options?.id || this.id;
+    this.product = options?.product || this.product;
+    this.nextCursor = options?.nextCursor || this.nextCursor;
+    return this;
+  }
+
+  public setNextCursor(nextCursor: string) {
+    this.nextCursor = nextCursor;
+    return this;
   }
 
   async request(): Promise<MusicMoodFeedResponseRootObject> {

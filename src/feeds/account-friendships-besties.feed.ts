@@ -1,14 +1,25 @@
 import { Expose, plainToClassFromExist } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { BestiesFeedResponse, BestiesFeedResponseUsersItem } from '../responses';
+import { BestiesFeedOptions } from '../types/feed.options';
 
 export class BestiesFeed extends Feed<BestiesFeedResponse, BestiesFeedResponseUsersItem> {
   @Expose()
   private nextMaxId: string;
 
-  set state(body: BestiesFeedResponse) {
+  protected set state(body: BestiesFeedResponse) {
     this.moreAvailable = !!body.next_max_id;
     this.nextMaxId = body.next_max_id;
+  }
+
+  public setOptions(options: Partial<BestiesFeedOptions>) {
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
   }
 
   async request() {

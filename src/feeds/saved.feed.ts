@@ -1,6 +1,7 @@
 import { Expose } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { SavedFeedResponseRootObject, SavedFeedResponseMedia } from '../responses';
+import { SavedFeedOptions } from '../types';
 
 export class SavedFeed extends Feed<SavedFeedResponseRootObject, SavedFeedResponseMedia> {
   @Expose()
@@ -9,6 +10,16 @@ export class SavedFeed extends Feed<SavedFeedResponseRootObject, SavedFeedRespon
   set state(body: SavedFeedResponseRootObject) {
     this.moreAvailable = body.more_available;
     this.nextMaxId = body.next_max_id;
+  }
+
+  public setOptions(options: Partial<SavedFeedOptions>) {
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
   }
 
   async request(): Promise<SavedFeedResponseRootObject> {

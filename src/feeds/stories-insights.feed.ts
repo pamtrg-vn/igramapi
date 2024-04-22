@@ -1,6 +1,7 @@
 import { Feed } from '../core/feed';
 import { Expose } from 'class-transformer';
 import { StoriesInsightsFeedResponseEdgesItem, StoriesInsightsFeedResponseRootObject } from '../responses';
+import { StoriesInsightsFeedOptions } from '../types';
 
 export class StoriesInsightsFeed extends Feed<
   StoriesInsightsFeedResponseRootObject,
@@ -12,6 +13,29 @@ export class StoriesInsightsFeed extends Feed<
   @Expose()
   private nextCursor: string = null;
 
+  @Expose()
+  private count: number = 15;
+
+  public setOptions(options: Partial<StoriesInsightsFeedOptions>) {
+    this.timeframe = options?.timeframe || this.timeframe;
+    this.nextCursor = options?.nextCursor || this.nextCursor;
+    this.count = options?.count || this.count;
+    return this;
+  }
+
+  public setNextCursor(nextCursor: string) {
+    this.nextCursor = nextCursor;
+    return this;
+  }
+  public setCount(count: number) {
+    this.count = count;
+    return this;
+  }
+  public setTimeframe(timeframe: StoriesInsightsFeedOptions['timeframe']) {
+    this.timeframe = timeframe;
+    return this;
+  }
+
   async items(): Promise<StoriesInsightsFeedResponseEdgesItem[]> {
     const body = await this.request();
     return body.data.user.business_manager.stories_unit.stories.edges;
@@ -22,7 +46,7 @@ export class StoriesInsightsFeed extends Feed<
       surface: { friendlyName: 'IgInsightsStoryGridSurfaceQuery' },
       documentId: '1995528257207653',
       variables: {
-        count: 15,
+        count: this.count,
         cursor: this.nextCursor,
         IgInsightsGridMediaImage_SIZE: 256,
         queryParams: {

@@ -4,6 +4,16 @@ import { UserStoryFeedResponseItemsItem, UserStoryFeedResponseRootObject } from 
 export class UserStoryFeed extends Feed<UserStoryFeedResponseRootObject, UserStoryFeedResponseItemsItem> {
   userId: string | number;
 
+  public setOptions(options: Partial<UserStoryFeed>) {
+    this.userId = options.userId || this.userId;
+    return this;
+  }
+
+  public setUserId(userId: string | number) {
+    this.userId = userId;
+    return this;
+  }
+
   async items(): Promise<UserStoryFeedResponseItemsItem[]> {
     const response = await this.request();
     if (!response.reel) {

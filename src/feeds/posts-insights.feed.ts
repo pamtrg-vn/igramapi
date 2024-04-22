@@ -1,6 +1,6 @@
 import { Feed } from '../core/feed';
 import { Expose } from 'class-transformer';
-import { PostsInsightsFeedOptions } from '../types';
+import { PostsInsightsFeedOptions, PostsInsightsFeedOptionOptions } from '../types';
 import { PostsInsightsFeedResponseEdgesItem, PostsInsightsFeedResponseRootObject } from '../responses';
 
 export class PostsInsightsFeed extends Feed<PostsInsightsFeedResponseRootObject, PostsInsightsFeedResponseEdgesItem> {
@@ -8,6 +8,17 @@ export class PostsInsightsFeed extends Feed<PostsInsightsFeedResponseRootObject,
 
   @Expose()
   private nextCursor: string = null;
+
+  public setOptions(options: Partial<PostsInsightsFeedOptionOptions>) {
+    this.options = options?.options || this.options;
+    this.nextCursor = options?.nextCursor || this.nextCursor;
+    return this;
+  }
+
+  public setNextCursor(nextCursor: string) {
+    this.nextCursor = nextCursor;
+    return this;
+  }
 
   async items(): Promise<PostsInsightsFeedResponseEdgesItem[]> {
     const body = await this.request();

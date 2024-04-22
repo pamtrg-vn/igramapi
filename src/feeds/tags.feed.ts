@@ -2,6 +2,7 @@ import { flatten } from 'lodash';
 import { Expose } from 'class-transformer';
 import { Feed } from '../core/feed';
 import { TagsFeedResponse, TagsFeedResponseMedia } from '../responses';
+import { TagsFeedOptions } from '../types';
 
 export class TagsFeed extends Feed<TagsFeedResponse, TagsFeedResponseMedia> {
   tag: string;
@@ -11,7 +12,41 @@ export class TagsFeed extends Feed<TagsFeedResponse, TagsFeedResponseMedia> {
   @Expose()
   private nextPage: number;
   @Expose()
-  private nextMediaIds: Array<string> = [];
+  private nextMediaIds: string[] = [];
+
+  public setOptions(options: Partial<TagsFeedOptions>) {
+    this.tag = options?.tag || this.tag;
+    this.tab = options?.tab || this.tab;
+    this.nextMaxId = options?.nextMaxId || this.nextMaxId;
+    this.nextPage = options?.nextPage || this.nextPage;
+    this.nextMediaIds = options?.nextMediaIds || this.nextMediaIds;
+    return this;
+  }
+
+  public setTag(tag: string) {
+    this.tag = tag;
+    return this;
+  }
+
+  public setTab(tab: TagsFeedOptions['tab']) {
+    this.tab = tab;
+    return this;
+  }
+
+  public setNextMaxId(nextMaxId: string) {
+    this.nextMaxId = nextMaxId;
+    return this;
+  }
+
+  public setNextPage(nextPage: number) {
+    this.nextPage = nextPage;
+    return this;
+  }
+
+  public setNextMediaIds(nextMediaIds: string[]) {
+    this.nextMediaIds = nextMediaIds;
+    return this;
+  }
 
   protected set state(body: TagsFeedResponse) {
     this.moreAvailable = body.more_available;

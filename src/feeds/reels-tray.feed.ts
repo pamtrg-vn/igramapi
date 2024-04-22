@@ -1,3 +1,4 @@
+import { ReelsTrayFeedOptions } from '../types';
 import { Feed } from '../core/feed';
 import { ReelsTrayFeedResponseRootObject, ReelsTrayFeedResponseTrayItem } from '../responses';
 
@@ -5,6 +6,16 @@ export class ReelsTrayFeed extends Feed<ReelsTrayFeedResponseRootObject, ReelsTr
   reason: 'cold_start' | 'pull_to_refresh';
 
   protected set state(response: ReelsTrayFeedResponseRootObject) {}
+
+  public setOptions(options: Partial<ReelsTrayFeedOptions>) {
+    this.reason = options?.reason || this.reason;
+    return this;
+  }
+
+  public setReason(reason: ReelsTrayFeedOptions['reason']) {
+    this.reason = reason;
+    return this;
+  }
 
   /**
    * Returns only the stories (without the broadcasts)

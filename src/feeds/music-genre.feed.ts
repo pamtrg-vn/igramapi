@@ -2,6 +2,7 @@ import { Feed } from '../core/feed';
 import { IgAppModule } from '../types/common.types';
 import { MusicGenreFeedResponseItemsItem, MusicGenreFeedResponseRootObject } from '../responses';
 import { Expose } from 'class-transformer';
+import { MusicGenreFeedOptions } from '../types/feed.options';
 
 export class MusicGenreFeed extends Feed<MusicGenreFeedResponseRootObject, MusicGenreFeedResponseItemsItem> {
   @Expose()
@@ -15,6 +16,18 @@ export class MusicGenreFeed extends Feed<MusicGenreFeedResponseRootObject, Music
   async items(): Promise<MusicGenreFeedResponseItemsItem[]> {
     const response = await this.request();
     return response.items;
+  }
+
+  public setOptions(options: Partial<MusicGenreFeedOptions>) {
+    this.id = options?.id || this.id;
+    this.product = options?.product || this.product;
+    this.nextCursor = options?.nextCursor || this.nextCursor;
+    return this;
+  }
+
+  public setNextCursor(nextCursor: string) {
+    this.nextCursor = nextCursor;
+    return this;
   }
 
   async request(): Promise<MusicGenreFeedResponseRootObject> {
