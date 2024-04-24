@@ -78,7 +78,7 @@ export class Request {
     const response = await this.faultTolerantRequest(options);
 
     this.updateState(response);
-    process.nextTick(() => this.end$.next());
+    process.nextTick(() => this.end$.next({ request: options, response: response }));
     if (response.body.status === 'ok' || (onlyCheckHttpStatus && response.statusCode === 200)) {
       return response;
     }
