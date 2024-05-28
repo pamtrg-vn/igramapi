@@ -8,7 +8,7 @@ import * as builds from '../samples/builds.json';
 import * as supportedCapabilities from '../samples/supported-capabilities.json';
 import * as Constants from './constants';
 import { ChallengeStateResponse, CheckpointResponse } from '../responses';
-import { IgClientError, IgCookieNotFoundError, IgNoCheckpointError, IgUserIdNotFoundError } from '../errors';
+import { IgCookieNotFoundError, IgNoCheckpointError, IgParseError, IgUserIdNotFoundError } from '../errors';
 import { Enumerable } from '../decorators';
 import debug from 'debug';
 
@@ -287,21 +287,21 @@ export class State {
   }
 
   public validateDevice(deviceString: string): string {
-    const parts = deviceString.split(';').map(part => part.trim());
+    const deviceParts = deviceString.split(';').map(part => part.trim());
     const deviceInfo = {
-      androidVersion: parts[0].split('/')[0],
-      apiLevel: parts[0].split('/')[1],
-      dpi: parts[1].replace('dpi', ''),
-      resolution: parts[2],
-      brand: parts[3],
-      model: parts[4],
-      codename: parts[5],
-      chipset: parts[6],
+      android_version: deviceParts[0].split('/')[0],
+      android_release: deviceParts[0].split('/')[1],
+      dpi: deviceParts[1].replace('dpi', ''),
+      resolution: deviceParts[2],
+      manufacturer: deviceParts[3],
+      model: deviceParts[4],
+      codename: deviceParts[5],
+      chipset: deviceParts[6],
     };
 
     for (const valueInfo of Object.values(deviceInfo)) {
       if (typeof valueInfo !== 'string' || valueInfo == '') {
-        throw new IgClientError(`Device invalid: "${deviceString}"`);
+        throw new IgParseError(`Device invalid: "${deviceString}"`);
       }
     }
 
