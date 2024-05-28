@@ -1,6 +1,6 @@
-export const APP_VERSION = '327.2.0.50.93';
-export const APP_VERSION_CODE = '588553316';
-export const SIGNATURE_KEY = 'SIGNATURE'; // '9193488027538fd3450b83b7d05286d4ca9599a0f7eeed90d8c85925698a05dc';
+export const APP_VERSION = '332.0.0.38.90';
+export const APP_VERSION_CODE = '603152339';
+export const SIGNATURE_KEY = 'SIGNATURE';
 export const BREADCRUMB_KEY = 'iN4$aGr0m';
 export const SIGNATURE_VERSION = '4';
 export const EXPERIMENTS =
@@ -12,7 +12,7 @@ export const FACEBOOK_OTA_FIELDS =
   'update%7Bdownload_uri%2Cdownload_uri_delta_base%2Cversion_code_delta_base%2Cdownload_uri_delta%2Cfallback_to_full_update%2Cfile_size_delta%2Cversion_code%2Cpublished_date%2Cfile_size%2Cota_bundle_type%2Cresources_checksum%2Callowed_networks%2Crelease_id%7D';
 export const FACEBOOK_ORCA_APPLICATION_ID = '124024574287414';
 
-export const BLOKS_VERSION_ID = '6d6625792ba3d0c6218c3b815fe5bffeac4f8fc5cbcc4da11d0a9631ca06ecd8';
+export const BLOKS_VERSION_ID = '1d85eb04419079358b68b92be6f523d99f895154273fd6dd5eb7d3df20e4453c';
 
 export const HOSTNAME = 'i.instagram.com';
 export const WEB_HOSTNAME = 'www.instagram.com';
