@@ -80,13 +80,19 @@ export class State {
   adsOptOut: boolean = false;
   thumbnailCacheBustingValue: number = 1000;
   igWWWClaim?: string;
+  igRur?: string;
+  igUserId?: string;
+  igShbts?: string;
+  igShbid?: string;
+  igDirectRegionHint?: string;
   authorization?: string;
   passwordEncryptionPubKey?: string;
   passwordEncryptionKeyId?: string | number;
-  machineId?: string;
+  mid?: string;
   deviceString: string;
   build: string;
   uuid: string;
+  uuidFamily?: string;
   phoneId: string;
   /**
    * Google Play Advertising ID.

@@ -38,6 +38,7 @@ import { RestrictActionRepository } from '../repositories/restrict-action.reposi
 import { AddressBookRepository } from '../repositories/address-book.repository';
 import { StatusRepository } from '../repositories/status.repository';
 import { IgtvRepository } from '../repositories/igtv.repository';
+import { BloksRepository } from '../repositories/bloks.repository';
 
 export class IgApiClient {
   public state = new State();
@@ -61,6 +62,7 @@ export class IgApiClient {
   public media = new MediaRepository(this);
   public qe = new QeRepository(this);
   public qp = new QpRepository(this);
+  public bloks = new BloksRepository(this);
   public tag = new TagRepository(this);
   public upload = new UploadRepository(this);
   public user = new UserRepository(this);

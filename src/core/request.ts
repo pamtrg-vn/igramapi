@@ -93,7 +93,12 @@ export class Request {
       'ig-set-authorization': auth,
       'ig-set-password-encryption-key-id': pwKeyId,
       'ig-set-password-encryption-pub-key': pwPubKey,
-      'ig-set-x-mid': machineId,
+      'ig-set-x-mid': mid,
+      'ig-set-ig-u-rur': igRur,
+      'ig-set-ig-u-ds-user-id': igUserId,
+      'ig-set-ig-u-shbts': igShbts,
+      'ig-set-ig-u-shbid': igShbid,
+      'ig-set-ig-u-ig-direct-region-hint': igDirectRegionHint,
     } = response.headers;
     if (typeof wwwClaim === 'string') {
       this.client.state.igWWWClaim = wwwClaim;
@@ -107,13 +112,28 @@ export class Request {
     if (typeof pwPubKey === 'string') {
       this.client.state.passwordEncryptionPubKey = pwPubKey;
     }
-    if (typeof machineId === 'string') {
-      this.client.state.machineId = machineId;
+    if (typeof mid === 'string') {
+      this.client.state.mid = mid;
+    }
+    if (typeof igRur === 'string') {
+      this.client.state.igRur = igRur;
+    }
+    if (typeof igUserId === 'string') {
+      this.client.state.igUserId = igUserId;
+    }
+    if (typeof igShbts === 'string') {
+      this.client.state.igShbts = igShbts;
+    }
+    if (typeof igShbid === 'string') {
+      this.client.state.igShbid = igShbid;
+    }
+    if (typeof igDirectRegionHint === 'string') {
+      this.client.state.igDirectRegionHint = igDirectRegionHint;
     }
   }
 
-  public signature(data: string) {
-    if (this.client.state.signatureKey == 'SIGNATURE') return this.client.state.signatureKey;
+  public signature(data: string, force: boolean = false) {
+    if (this.client.state.signatureKey == 'SIGNATURE' && !force) return this.client.state.signatureKey;
     return createHmac('sha256', this.client.state.signatureKey)
       .update(data)
       .digest('hex');
@@ -205,21 +225,27 @@ export class Request {
       'X-IG-Bandwidth-Speed-KBPS': '-1.000',
       'X-IG-Bandwidth-TotalBytes-B': '0',
       'X-IG-Bandwidth-TotalTime-MS': '0',
-      'X-IG-EU-DC-ENABLED':
-        typeof this.client.state.euDCEnabled === 'undefined' ? void 0 : this.client.state.euDCEnabled.toString(),
+      'X-IG-EU-DC-ENABLED': this.client.state.euDCEnabled,
       'X-IG-Extended-CDN-Thumbnail-Cache-Busting-Value': this.client.state.thumbnailCacheBustingValue.toString(),
       'X-Bloks-Version-Id': this.client.state.bloksVersionId,
-      'X-MID': this.client.state.extractCookie('mid')?.value ?? this.client.state.machineId,
-      'X-IG-WWW-Claim': this.client.state.igWWWClaim || '0',
       'X-Bloks-Is-Layout-RTL': this.client.state.isLayoutRTL.toString(),
+      'X-MID': this.client.state.extractCookie('mid')?.value ?? this.client.state.mid,
+      'IG-U-IG-Direct-Region-Hint': this.client.state.igDirectRegionHint,
+      'IG-U-Shbid': this.client.state.igShbid,
+      'IG-U-Shbts': this.client.state.igShbts,
+      'IG-U-DS-User-ID': this.client.state.igUserId,
+      'IG-U-RUR': this.client.state.igRur,
+      'IG-Intended-User-ID': this.client.state.igUserId || '0',
+      'X-IG-WWW-Claim': this.client.state.igWWWClaim || '0',
       'X-IG-Connection-Type': this.client.state.connectionTypeHeader,
       'X-IG-Capabilities': this.client.state.capabilitiesHeader,
       'X-IG-App-ID': this.client.state.fbAnalyticsApplicationId,
       'X-IG-Device-ID': this.client.state.uuid,
+      'X-IG-Family-Device-ID': this.client.state.uuidFamily,
       'X-IG-Android-ID': this.client.state.deviceId,
       'Accept-Language': this.client.state.language.replace('_', '-'),
       'X-FB-HTTP-Engine': 'Liger',
-      'X-FB-Client-Ip': 'True',
+      'X-FB-Client-IP': 'True',
       'X-FB-Server-Cluster': 'True',
       Authorization: this.client.state.authorization,
       Host: 'i.instagram.com',

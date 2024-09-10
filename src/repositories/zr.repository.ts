@@ -12,4 +12,19 @@ export class ZrRepository extends Repository {
       },
     });
   }
+
+  public async dualTokens(normalTokenHash: string = '') {
+    const result = await this.client.request.send({
+      url: '/api/v1/zr/dual_tokens/',
+      method: 'POST',
+      form: {
+        normal_token_hash: normalTokenHash,
+        device_id: this.client.state.deviceId,
+        custom_device_id: this.client.state.uuid,
+        fetch_reason: 'token_expired',
+      },
+    });
+
+    return result;
+  }
 }
