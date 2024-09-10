@@ -5,6 +5,9 @@ import {
 } from '../responses';
 
 export class FbsearchRepository extends Repository {
+  /**
+   * @deprecated This endpoint is not used on Instagram >= v332
+   */
   async suggestedSearches(type: 'blended' | 'users' | 'hashtags' | 'places') {
     const { body } = await this.client.request.send({
       url: '/api/v1/fbsearch/suggested_searches/',
