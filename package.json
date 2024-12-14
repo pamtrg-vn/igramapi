@@ -27,8 +27,7 @@
         "prepare": "npm run build",
         "test": "mocha --inline-diffs --timeout 1000000 tests/run.js",
         "generate-interface": "ts-node ./tools/response-to-interface.ts",
-        "generate-docs": "typedoc",
-        "example": "ts-node ./example/2fa-sms-login.example.ts"
+        "generate-docs": "typedoc"
     },
     "husky": {
         "hooks": {
