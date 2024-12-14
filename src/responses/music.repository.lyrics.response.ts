@@ -1,11 +1,11 @@
 export interface MusicRepositoryLyricsResponseRootObject {
-  lyrics: MusicRepositoryLyricsResponseLyrics;
-  status: string;
+    lyrics: MusicRepositoryLyricsResponseLyrics;
+    status: string;
 }
 export interface MusicRepositoryLyricsResponseLyrics {
-  phrases: MusicRepositoryLyricsResponsePhrasesItem[];
+    phrases: MusicRepositoryLyricsResponsePhrasesItem[];
 }
 export interface MusicRepositoryLyricsResponsePhrasesItem {
-  start_time_in_ms: number;
-  phrase: string;
+    start_time_in_ms: number;
+    phrase: string;
 }

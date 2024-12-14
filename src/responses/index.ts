@@ -73,6 +73,8 @@ export * from './status.response';
 export * from './reels-tray.feed.response';
 export * from './music.repository.moods.response';
 export * from './music.repository.genres.response';
+export * from './music.repository.lyrics.response';
+export * from './music.repository.global.search.response';
 export * from './music-trending.feed.response';
 export * from './music-search.feed.response';
 export * from './music-genre.feed.response';

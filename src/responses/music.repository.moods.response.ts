@@ -1,12 +1,12 @@
 export interface MusicRepositoryMoodsResponseRootObject {
-  items: MusicRepositoryMoodsResponseItemsItem[];
-  status: string;
+    items: MusicRepositoryMoodsResponseItemsItem[];
+    status: string;
 }
 export interface MusicRepositoryMoodsResponseItemsItem {
-  mood: MusicRepositoryMoodsResponseMood;
+    mood: MusicRepositoryMoodsResponseMood;
 }
 export interface MusicRepositoryMoodsResponseMood {
-  id: string;
-  name: string;
-  cover_artwork_uri: string;
+    id: string;
+    name: string;
+    cover_artwork_uri: string;
 }

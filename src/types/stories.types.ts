@@ -1,13 +1,13 @@
 export interface StoryServiceSeenInputItems {
-  id: string;
-  taken_at: number;
-  user: {
-    pk: number;
-  };
+    id: string;
+    taken_at: number;
+    user: {
+        pk: number;
+    };
 }
 
 export interface StoryServiceSeenInputReels {
-  items: StoryServiceSeenInputItems[];
+    items: StoryServiceSeenInputItems[];
 }
 
 export type StoryServiceInput = StoryServiceSeenInputItems[] | StoryServiceSeenInputReels;

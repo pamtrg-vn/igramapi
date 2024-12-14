@@ -6,84 +6,84 @@ import { TopicalExploreFeedResponseRootObject, TopicalExploreFeedResponseSection
 const chance = new Chance();
 
 export class TopicalExploreFeed extends Feed<
-  TopicalExploreFeedResponseRootObject,
-  TopicalExploreFeedResponseSectionalItemsItem
+    TopicalExploreFeedResponseRootObject,
+    TopicalExploreFeedResponseSectionalItemsItem
 > {
-  module: IgAppModule = 'explore_popular';
-  lat?: string | number;
-  lng?: string | number;
-  /**
-   * Change this to set the category
-   */
-  clusterId = 'explore_all:0';
-  sessionId = chance.guid({ version: 4 });
+    module: IgAppModule = 'explore_popular';
+    lat?: string | number;
+    lng?: string | number;
+    /**
+     * Change this to set the category
+     */
+    clusterId = 'explore_all:0';
+    sessionId = chance.guid({ version: 4 });
 
-  @Expose()
-  private nextMaxId: string;
+    @Expose()
+    private nextMaxId: string;
 
-  set state(body: TopicalExploreFeedResponseRootObject) {
-    this.nextMaxId = body.next_max_id;
-    this.moreAvailable = body.more_available;
-  }
+    set state(body: TopicalExploreFeedResponseRootObject) {
+        this.nextMaxId = body.next_max_id;
+        this.moreAvailable = body.more_available;
+    }
 
-  public setOptions(options: Partial<TopicalExploreFeedOptions>) {
-    this.module = options.module || this.module;
-    this.lat = options.lat || this.lat;
-    this.lng = options.lng || this.lng;
-    this.clusterId = options.clusterId || this.clusterId;
-    this.nextMaxId = options.nextMaxId || this.nextMaxId;
-    return this;
-  }
+    public setOptions(options: Partial<TopicalExploreFeedOptions>) {
+        this.module = options.module || this.module;
+        this.lat = options.lat || this.lat;
+        this.lng = options.lng || this.lng;
+        this.clusterId = options.clusterId || this.clusterId;
+        this.nextMaxId = options.nextMaxId || this.nextMaxId;
+        return this;
+    }
 
-  public setModule(module: string) {
-    this.module = module;
-    return this;
-  }
+    public setModule(module: string) {
+        this.module = module;
+        return this;
+    }
 
-  public setLat(latitude: string | number) {
-    this.lat = latitude;
-    return this;
-  }
+    public setLat(latitude: string | number) {
+        this.lat = latitude;
+        return this;
+    }
 
-  public setLng(longitude: string | number) {
-    this.lng = longitude;
-    return this;
-  }
+    public setLng(longitude: string | number) {
+        this.lng = longitude;
+        return this;
+    }
 
-  public setClusterId(clusterId: string) {
-    this.clusterId = clusterId;
-    return this;
-  }
+    public setClusterId(clusterId: string) {
+        this.clusterId = clusterId;
+        return this;
+    }
 
-  public setNextMaxId(nextMaxId: string) {
-    this.nextMaxId = nextMaxId;
-    return this;
-  }
+    public setNextMaxId(nextMaxId: string) {
+        this.nextMaxId = nextMaxId;
+        return this;
+    }
 
-  async items(): Promise<TopicalExploreFeedResponseSectionalItemsItem[]> {
-    const res = await this.request();
-    return res.sectional_items;
-  }
+    async items(): Promise<TopicalExploreFeedResponseSectionalItemsItem[]> {
+        const res = await this.request();
+        return res.sectional_items;
+    }
 
-  async request(): Promise<TopicalExploreFeedResponseRootObject> {
-    const { body } = await this.client.request.send({
-      url: '/api/v1/discover/topical_explore/',
-      method: 'GET',
-      qs: {
-        is_prefetch: false,
-        omit_cover_media: true,
-        max_id: this.nextMaxId,
-        module: this.module,
-        reels_configuration: 'hide_hero',
-        use_sectional_payload: true,
-        timezone_offset: this.client.state.timezoneOffset,
-        lat: this.lat,
-        lng: this.lng,
-        cluster_id: this.clusterId,
-        session_id: this.sessionId,
-        include_fixed_destinations: true,
-      },
-    });
-    return body;
-  }
+    async request(): Promise<TopicalExploreFeedResponseRootObject> {
+        const { body } = await this.client.request.send({
+            url: '/api/v1/discover/topical_explore/',
+            method: 'GET',
+            qs: {
+                is_prefetch: false,
+                omit_cover_media: true,
+                max_id: this.nextMaxId,
+                module: this.module,
+                reels_configuration: 'hide_hero',
+                use_sectional_payload: true,
+                timezone_offset: this.client.state.timezoneOffset,
+                lat: this.lat,
+                lng: this.lng,
+                cluster_id: this.clusterId,
+                session_id: this.sessionId,
+                include_fixed_destinations: true,
+            },
+        });
+        return body;
+    }
 }
